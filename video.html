@@ -16,7 +16,7 @@
     <img id="image" src="data:image/jpeg;base64," alt="hi there">
 
     <script>
-        let ws = new WebSocket("ws://localhost:420/video");
+        let ws = new WebSocket("ws://localhost:420/web");
         ws.onmessage = function(event) {
             // https://stackoverflow.com/questions/18650168/convert-blob-to-base64
             // the code below converts the binary blob message into base64 string,
