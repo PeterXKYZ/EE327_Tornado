@@ -7,39 +7,133 @@
     <title>Video thing</title>
 </head>
 <body>
-    <h2>A live-ish Video?</h2>
-    <button onclick="cam_on()">Camera On</button>
+    <h2>PolterChime Web Portal</h2>
+    <h3>Live Video Display</h3>
+    <button id="on_button" onclick="cam_on()">Camera On</button>
+    <button id="off_button" onclick="cam_off()">Camera Off</button>
+    <button id="ext_button" onclick="cam_extend()">Camera Extend</button>
     <br>
-    <button onclick="cam_off()">Camera Off</button>
+    <br>
+    <img id="video" src="" alt="hi there">
+    <br>
+    <h3>Most recent picture was taken at:</h3>
+    <br>
+    <button id="show_recent_pic_button" onclick="show_recent()">View Picture</button> 
+    <button id="hide_recent_pic_button" onclick="hide_recent()">Hide Picture</button> 
+    <br>
+    <img id="recent_pic" src="" alt="">
     <br>
     <br>
-    <img id="image" src="data:image/jpeg;base64," alt="hi there">
+    <button onclick="show_log()">Show Log</button>
 
     <script>
         let ws = new WebSocket("ws://localhost:420/web");
+        let cam_on_bool = false;
+        let recent_pic_data = "test.jpg";
+        let frame_count = 0;
+        let frame_dec = 1;
+        buttonhide(0);
+        hide_recent();
+
         ws.onmessage = function(event) {
-            // https://stackoverflow.com/questions/18650168/convert-blob-to-base64
-            // the code below converts the binary blob message into base64 string,
-            // which is then appended to the image source to be rendered as a jpeg.
-            var reader = new FileReader();
-            reader.readAsDataURL(event.data); 
-            reader.onloadend = function() {
-                var base64data = reader.result;
-                
-                // Need to remove some junk at the start of the message
-                var realdata = base64data.substr(base64data.indexOf(',') + 1);  
-                document.getElementById("image").src = "data:image/jpeg;base64," + realdata;
+            console.log(`${typeof event.data}`);
+            if (typeof event.data === "string") {
+                cam_on();
             }
-            // document.getElementById("image").src = "test.jpg"
+            else if (typeof event.data === "object") {
+                if (cam_on_bool) {
+                    // https://stackoverflow.com/questions/18650168/convert-blob-to-base64
+                    // the code below converts the binary blob message into base64 string,
+                    // which is then appended to the image source to be rendered as a jpeg.
+                    var reader = new FileReader();
+                    reader.readAsDataURL(event.data); 
+                    reader.onloadend = function() {
+                        var base64data = reader.result;
+                        
+                        // Need to remove some junk at the start of the message
+                        var realdata = base64data.substr(base64data.indexOf(',') + 1);  
+                        document.getElementById("video").src = "data:image/jpeg;base64," + realdata;
+                        frame_count -= frame_dec;
+                        if (frame_count == 0) {
+                            cam_off();
+                        }
+                    }
+                }
+                else {
+                    // when cam_off() is called, cam_on_bool is set to false immediately, 
+                    // but the ESP32 cam does not turn off immediately, and so a few straggler
+                    // images are interpreted as motion sensor images. 
+                    var reader = new FileReader();
+                    reader.readAsDataURL(event.data); 
+                    reader.onloadend = function() {
+                        var base64data = reader.result;
+                        
+                        // Need to remove some junk at the start of the message
+                        var realdata = base64data.substr(base64data.indexOf(',') + 1);  
+                        recent_pic_data = "data:image/jpeg;base64," + realdata;
+                        document.getElementById("recent_pic").src = recent_pic_data;
+                    }
+                }
+            }
         };
 
         function cam_on() {
             ws.send("on");
+            buttonhide(1);
+            cam_on_bool = true;
+            frame_dec = 1;
+            frame_count = 100;
         }
 
         function cam_off() {
             ws.send("off");
+            document.getElementById("video").src = "";
+            buttonhide(0);
+            cam_on_bool = false;
         }
+
+        function cam_extend() {
+            //Turn off timer and keep camera on HERE
+            buttonhide(2);
+            frame_dec = 0;
+        }
+
+        function buttonhide(cam_state) {
+            if (cam_state == 0) {
+                document.getElementById("on_button").style.visibility = "visible";
+                document.getElementById("off_button").style.visibility = "hidden";
+                document.getElementById("ext_button").style.visibility = "hidden";
+                document.getElementById("video").style.visibility = "hidden";
+            }
+            else if (cam_state == 1) {
+                document.getElementById("on_button").style.visibility = "hidden";
+                document.getElementById("off_button").style.visibility = "visible";
+                document.getElementById("ext_button").style.visibility = "visible";
+                document.getElementById("video").style.visibility = "visible";
+            }
+            else if (cam_state == 2) {
+                document.getElementById("on_button").style.visibility = "hidden";
+                document.getElementById("off_button").style.visibility = "visible";
+                document.getElementById("ext_button").style.visibility = "hidden";
+                document.getElementById("video").style.visibility = "visible";
+            }
+        }
+
+        function show_recent() {
+            document.getElementById("recent_pic").src = recent_pic_data;
+            document.getElementById("recent_pic").style.visibility = "visible";
+            document.getElementById("show_recent_pic_button").style.visibility = "hidden";
+            document.getElementById("hide_recent_pic_button").style.visibility = "visible";
+        }
+
+        function hide_recent() {
+            document.getElementById("recent_pic").src = "";
+            document.getElementById("recent_pic").style.visibility = "hidden";
+            document.getElementById("show_recent_pic_button").style.visibility = "visible";
+            document.getElementById("hide_recent_pic_button").style.visibility = "hidden";
+        }
+        
+        function show_log() {}
     </script>
 </body>
 </html>
