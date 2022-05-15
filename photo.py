@@ -5,6 +5,7 @@ import tornado.ioloop
 import tornado.websocket
 import cv2 as cv
 import numpy as np
+import sms
 
 cl_web = []
 cl_cam = []
@@ -71,9 +72,19 @@ class EspHandler(tornado.websocket.WebSocketHandler):
         if (message == "button"):
             for c in cl_web:
                 c.write_message(message) 
+            
+            # when the doorbell button is pressed, send a SMS message
+            # to the phone number provided in sms.py
+            print("send text?")
+            sms.button_send_text()
+
         elif (message == "pir"):
             for c in cl_cam:
-                c.write_message("photo")        
+                c.write_message("photo")
+
+            # when the pir sensor is triggered, send a SMS message
+            # to the phone number provided in sms.py        
+            sms.pir_send_text()
 
     def on_close(self):
         print("esp WebSocket closed")
