@@ -46,9 +46,17 @@ class CamHandler(tornado.websocket.WebSocketHandler):
         cl_cam.append(self)
 
     def on_message(self, message):
-        print(type(message)) 
-        for c in cl_web:
-            c.write_message(message, True)  # True means to send message as binary
+        if message == "button":
+            for c in cl_web:
+                c.write_message("button")
+
+            # when the doorbell button is pressed, send a SMS message
+            # to the phone number provided in sms.py
+            print("send text?")
+            sms.button_send_text()
+        else:        
+            for c in cl_web:
+                c.write_message(message, True)  # True means to send message as binary
 
         # https://stackoverflow.com/questions/62348356/decode-image-bytes-data-stream-to-jpeg
         # msg = np.frombuffer(message, dtype=np.uint8)
