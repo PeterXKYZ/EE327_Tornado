@@ -1,4 +1,5 @@
 from errno import EALREADY
+from multiprocessing.dummy import Array
 from sys import flags
 import tornado.web
 import tornado.ioloop
@@ -10,6 +11,10 @@ import sms
 cl_web = []
 cl_cam = []
 cl_esp = []
+
+def client_write_msg(cl, msg, binary=False):
+    for c in cl:
+        c. write(msg, binary)
 
 class IndexHandler(tornado.web.RequestHandler):
     def get(self):
@@ -28,8 +33,7 @@ class WebPageHandler(tornado.websocket.WebSocketHandler):
         print(message)
         # everytime a message arrives at the web client, it
         # passes the message along to the cam client
-        for c in cl_cam:
-            c.write_message(message)
+        client_write_msg(cl_cam, message)
             
     def on_close(self):
         print("webpage WebSocket closed")
@@ -47,16 +51,22 @@ class CamHandler(tornado.websocket.WebSocketHandler):
 
     def on_message(self, message):
         if message == "button":
-            for c in cl_web:
-                c.write_message("button")
-
+            client_write_msg(cl_web, "button")
+        
             # when the doorbell button is pressed, send a SMS message
             # to the phone number provided in sms.py
             print("send text?")
             sms.button_send_text()
+
+        elif (message == "pir"):
+            client_write_msg(cl_cam, "photo")
+
+            # when the pir sensor is triggered, send a SMS message
+            # to the phone number provided in sms.py        
+            sms.pir_send_text()    
+
         else:        
-            for c in cl_web:
-                c.write_message(message, True)  # True means to send message as binary
+            client_write_msg(cl_web, message, True) # True means to send message as binary
 
         # https://stackoverflow.com/questions/62348356/decode-image-bytes-data-stream-to-jpeg
         # msg = np.frombuffer(message, dtype=np.uint8)
@@ -69,43 +79,12 @@ class CamHandler(tornado.websocket.WebSocketHandler):
 
     def check_origin(self, origin):
         return True  
-
-class EspHandler(tornado.websocket.WebSocketHandler):
-    def open(self):
-        print("esp WebSocket opened")
-        cl_esp.clear()
-        cl_esp.append(self)
-
-    def on_message(self, message):
-        if (message == "button"):
-            for c in cl_web:
-                c.write_message(message) 
-            
-            # when the doorbell button is pressed, send a SMS message
-            # to the phone number provided in sms.py
-            print("send text?")
-            sms.button_send_text()
-
-        elif (message == "pir"):
-            for c in cl_cam:
-                c.write_message("photo")
-
-            # when the pir sensor is triggered, send a SMS message
-            # to the phone number provided in sms.py        
-            sms.pir_send_text()
-
-    def on_close(self):
-        print("esp WebSocket closed")
-        cl_esp.remove(self)
-
-    def check_origin(self, origin):
-        return True  
-
+ 
+ 
 urls = [
     (r"/", IndexHandler),
     (r"/web", WebPageHandler),
     (r"/cam", CamHandler),
-    (r"/esp", EspHandler),
     # https://stackoverflow.com/questions/32288515/how-to-load-html-image-files-on-the-python-tornado
     (r"/(test.jpg)", tornado.web.StaticFileHandler, {"path": "./"}) # used by html page to load a photo
 ]
