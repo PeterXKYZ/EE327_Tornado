@@ -7,18 +7,23 @@ import tornado.websocket
 import cv2 as cv
 import numpy as np
 import sms
+import time
 
 cl_web = []
 cl_cam = []
 cl_esp = []
+cam_on = False
+
 
 def client_write_msg(cl, msg, binary=False):
     for c in cl:
         c.write_message(msg, binary=binary)
 
+
 class IndexHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("video.html")
+
 
 class WebPageHandler(tornado.websocket.WebSocketHandler):
     def open(self):
@@ -30,7 +35,12 @@ class WebPageHandler(tornado.websocket.WebSocketHandler):
         cl_web.append(self)
 
     def on_message(self, message):
-        print(message)
+        global cam_on
+        if message == "on":
+            cam_on = True
+        elif message == "off":
+            cam_on = False
+
         # everytime a message arrives at the web client, it
         # passes the message along to the cam client
         client_write_msg(cl_cam, message)
@@ -42,6 +52,7 @@ class WebPageHandler(tornado.websocket.WebSocketHandler):
     def check_origin(self, origin):
         return True 
     
+
 class CamHandler(tornado.websocket.WebSocketHandler):
     def open(self):
         print("cam WebSocket opened")
@@ -56,22 +67,25 @@ class CamHandler(tornado.websocket.WebSocketHandler):
             # when the doorbell button is pressed, send a SMS message
             # to the phone number provided in sms.py
             print("send text?")
-            # sms.button_send_text() 
+            sms.button_send_text() 
 
-        elif (message == "pir"):
+        elif message == "pir":
             client_write_msg(cl_cam, "photo")
 
             # when the pir sensor is triggered, send a SMS message
             # to the phone number provided in sms.py        
             sms.pir_send_text()    
 
-        else:        
+        else:
             client_write_msg(cl_web, message, True) # True means to send message as binary
+            
+            global cam_on
+            if not cam_on:        
+                # https://stackoverflow.com/questions/62348356/decode-image-bytes-data-stream-to-jpeg
+                msg = np.frombuffer(message, dtype=np.uint8)
+                img = cv.imdecode(msg, cv.IMREAD_UNCHANGED)
+                cv.imwrite(f"img/{time.time()}.jpg", img)
 
-        # https://stackoverflow.com/questions/62348356/decode-image-bytes-data-stream-to-jpeg
-        # msg = np.frombuffer(message, dtype=np.uint8)
-        # img = cv.imdecode(msg, cv.IMREAD_UNCHANGED)
-        # cv.imwrite("test.jpg", img)
         
     def on_close(self):
         print("cam WebSocket closed")

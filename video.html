@@ -23,6 +23,7 @@
     <br>
     <h3>Most recent picture was taken at:</h3>
     <br>
+    <button id="take_picture_button" onclick="take_picture()">Take Picture</button>
     <button id="show_recent_pic_button" onclick="show_recent()">View Picture</button> 
     <button id="hide_recent_pic_button" onclick="hide_recent()">Hide Picture</button> 
     <br>
@@ -77,6 +78,7 @@
                         var realdata = base64data.substr(base64data.indexOf(',') + 1);  
                         recent_pic_data = "data:image/jpeg;base64," + realdata;
                         document.getElementById("recent_pic").src = recent_pic_data;
+                        console.log("photo taken");
                     }
                 }
             }
@@ -125,17 +127,19 @@
         }
 
         function show_recent() {
-            document.getElementById("recent_pic").src = recent_pic_data;
             document.getElementById("recent_pic").style.visibility = "visible";
             document.getElementById("show_recent_pic_button").style.visibility = "hidden";
             document.getElementById("hide_recent_pic_button").style.visibility = "visible";
         }
 
         function hide_recent() {
-            document.getElementById("recent_pic").src = "";
             document.getElementById("recent_pic").style.visibility = "hidden";
             document.getElementById("show_recent_pic_button").style.visibility = "visible";
             document.getElementById("hide_recent_pic_button").style.visibility = "hidden";
+        }
+
+        function take_picture() {
+            ws.send("photo");
         }
 
         function psound1() {
