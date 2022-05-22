@@ -14,7 +14,7 @@ cl_esp = []
 
 def client_write_msg(cl, msg, binary=False):
     for c in cl:
-        c. write(msg, binary)
+        c.write_message(msg, binary=binary)
 
 class IndexHandler(tornado.web.RequestHandler):
     def get(self):

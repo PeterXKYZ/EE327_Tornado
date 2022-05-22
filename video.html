@@ -14,7 +14,12 @@
     <button id="ext_button" onclick="cam_extend()">Camera Extend</button>
     <br>
     <br>
-    <img id="video" src="" alt="hi there">
+    <img id="video" src="" alt="error: video not found">
+    <br>
+    <h4>Play Doorbell Sounds:</h4>
+    <button id="sound_button" onclick="psound1()">Sound 1</button>
+    <button id="sound_button" onclick="psound2()">Sound 2</button>
+    <button id="sound_button" onclick="psound3()">Sound 3</button>
     <br>
     <h3>Most recent picture was taken at:</h3>
     <br>
@@ -131,6 +136,10 @@
             document.getElementById("recent_pic").style.visibility = "hidden";
             document.getElementById("show_recent_pic_button").style.visibility = "visible";
             document.getElementById("hide_recent_pic_button").style.visibility = "hidden";
+        }
+
+        function psound1() {
+            ws.send("s1");
         }
         
         function show_log() {}
