@@ -56,7 +56,7 @@ class CamHandler(tornado.websocket.WebSocketHandler):
             # when the doorbell button is pressed, send a SMS message
             # to the phone number provided in sms.py
             print("send text?")
-            sms.button_send_text()
+            # sms.button_send_text() 
 
         elif (message == "pir"):
             client_write_msg(cl_cam, "photo")
