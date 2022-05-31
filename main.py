@@ -23,7 +23,7 @@ def client_write_msg(cl, msg, binary=False):
 
 class IndexHandler(tornado.web.RequestHandler):
     def get(self):
-        self.render("video2.html") 
+        self.render("video.html") 
 
 
 class WebPageHandler(tornado.websocket.WebSocketHandler):
