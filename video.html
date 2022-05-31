@@ -77,6 +77,8 @@
     <br>
     <button class="button extbutton" onclick="show_log()">Show Log</button>
     <button class="button extbutton" onclick="delete_log()">Delete Log</button>
+    <table id="log_table">
+    </table>
 
     <script>
         //Use sticky for LOG header, and use fixed for the ghost image
@@ -91,7 +93,23 @@
         ws.onmessage = function(event) {
             console.log(`${typeof event.data}`);
             if (typeof event.data === "string") {
-                cam_on();
+                if (event.data === "button") {
+                    cam_on();
+                    return;
+                }
+                else {
+                    https://thewebdev.info/2021/05/15/how-to-create-an-html-table-using-javascript/
+                    const table = document.getElementById("log_table");
+                    const tr = document.createElement('tr');
+                    table.appendChild(tr);
+                    
+                    const td = document.createElement('td');
+                    td.width = '200';
+                    td.appendChild(document.createTextNode(`${event.data}`))
+                    tr.appendChild(td);
+        
+                    return;
+                }
             }
             else if (typeof event.data === "object") {
                 if (cam_on_bool) {
@@ -201,7 +219,9 @@
             ws.send("s3");
         }
         
-        function show_log() {}
+        function show_log() {
+            ws.send("show");
+        }
 
         function delete_log() {
             ws.send("delete");

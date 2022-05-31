@@ -1,6 +1,7 @@
 from errno import EALREADY
 from multiprocessing.dummy import Array
 from sys import flags
+from cv2 import log
 import tornado.web
 import tornado.ioloop
 import tornado.websocket
@@ -23,7 +24,7 @@ def client_write_msg(cl, msg, binary=False):
 
 class IndexHandler(tornado.web.RequestHandler):
     def get(self):
-        self.render("video.html") 
+        self.render("video.html")  
 
 
 class WebPageHandler(tornado.websocket.WebSocketHandler):
@@ -41,6 +42,10 @@ class WebPageHandler(tornado.websocket.WebSocketHandler):
             cam_on = True
         elif message == "off":
             cam_on = False
+        elif message == "show":
+            log_list = os.listdir("img/")
+            for img in log_list:
+                client_write_msg(cl_web, img)
         elif message == "delete":
             # https://stackoverflow.com/questions/1548704/delete-multiple-files-matching-a-pattern
             for f in glob.glob("img/*.jpg"):
