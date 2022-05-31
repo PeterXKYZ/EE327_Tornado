@@ -42,6 +42,7 @@ class WebPageHandler(tornado.websocket.WebSocketHandler):
         elif message == "off":
             cam_on = False
         elif message == "delete":
+            # https://stackoverflow.com/questions/1548704/delete-multiple-files-matching-a-pattern
             for f in glob.glob("img/*.jpg"):
                 os.remove(f)
 
