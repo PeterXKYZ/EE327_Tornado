@@ -5,34 +5,81 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video thing</title>
+    <style>
+        body {background-color: #c09ee2;}
+        .button {
+            background-color: #6463d0;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+        .extbutton {
+            background-color: #99d063;
+        }
+        .g {
+            background-color: #d063d0;
+        }
+        img.videoimage {
+            position: static;
+            border: 6px solid #545aa4;
+        }
+        h2 {
+            color: aliceblue;
+        }
+        h3 {
+            color: #818181
+        }
+        h4{
+            color: #ffbf91
+        }
+        img.ghost {
+            position: fixed;
+            top: 0;
+            right: 0;
+        }
+        h3.logheader {
+            position: -webkit-sticky;
+            position: sticky;
+            top: 0;
+        }
+    </style>
 </head>
 <body>
+    <img class="ghost" src="logo.jpg" alt="img not found">
     <h2>PolterChime Web Portal</h2>
     <h3>Live Video Display</h3>
-    <button id="on_button" onclick="cam_on()">Camera On</button>
-    <button id="off_button" onclick="cam_off()">Camera Off</button>
-    <button id="ext_button" onclick="cam_extend()">Camera Extend</button>
+    <button class="button" id="on_button" onclick="cam_on()">Camera On</button>
+    <button class="button" id="off_button" onclick="cam_off()">Camera Off</button>
+    <button class="button extbutton" id="ext_button" onclick="cam_extend()">Camera Extend</button>
     <br>
     <br>
-    <img id="video" src="" alt="error: video not found">
+    <img class="videoimage" id="video" src="" alt="error: video not found">
     <br>
     <h4>Play Doorbell Sounds:</h4>
-    <button id="sound_button" onclick="psound1()">Sound 1</button>
-    <button id="sound_button" onclick="psound2()">Sound 2</button>
-    <button id="sound_button" onclick="psound3()">Sound 3</button>
+    <button class="button g" id="sound_button" onclick="psound1()">Sound 1</button>
+    <button class="button g" id="sound_button" onclick="psound2()">Sound 2</button>
+    <button class="button g" id="sound_button" onclick="psound3()">Sound 3</button>
     <br>
     <h3>Most recent picture was taken at:</h3>
     <br>
-    <button id="take_picture_button" onclick="take_picture()">Take Picture</button>
-    <button id="show_recent_pic_button" onclick="show_recent()">View Picture</button> 
-    <button id="hide_recent_pic_button" onclick="hide_recent()">Hide Picture</button> 
+    <button class="button" id="take_picture_button" onclick="take_picture()">Take Picture</button>
+    <button class="button" id="show_recent_pic_button" onclick="show_recent()">View Picture</button> 
+    <button class="button" id="hide_recent_pic_button" onclick="hide_recent()">Hide Picture</button> 
     <br>
-    <img id="recent_pic" src="" alt="">
+    <img class="videoimage" id="recent_pic" src="logo.jpg" alt="pic not found">
     <br>
     <br>
-    <button onclick="show_log()">Show Log</button>
+    <button class="button extbutton" onclick="show_log()">Show Log</button>
+    <button class="button extbutton" onclick="delete_log()">Delete Log</button>
 
     <script>
+        //Use sticky for LOG header, and use fixed for the ghost image
         let ws = new WebSocket("ws://localhost:420/web");
         let cam_on_bool = false;
         let recent_pic_data = "test.jpg";
@@ -155,6 +202,10 @@
         }
         
         function show_log() {}
+
+        function delete_log() {
+            ws.send("delete");
+        }
     </script>
 </body>
 </html>
