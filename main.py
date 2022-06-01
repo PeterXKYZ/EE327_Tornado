@@ -1,7 +1,3 @@
-from errno import EALREADY
-from multiprocessing.dummy import Array
-from sys import flags
-from cv2 import log
 import tornado.web
 import tornado.ioloop
 import tornado.websocket
@@ -24,7 +20,7 @@ def client_write_msg(cl, msg, binary=False):
 
 class IndexHandler(tornado.web.RequestHandler):
     def get(self):
-        self.render("video.html")  
+        self.render("video.html")   
 
 
 class WebPageHandler(tornado.websocket.WebSocketHandler):
@@ -114,7 +110,7 @@ urls = [
     (r"/cam", CamHandler),
     # https://stackoverflow.com/questions/32288515/how-to-load-html-image-files-on-the-python-tornado
     (r"/resources/(test.jpg)", tornado.web.StaticFileHandler, {"path": "./"}), # used by html page to load a photo
-    (r"/resources/(logo.jpg)", tornado.web.StaticFileHandler, {"path": "./"}) # used by html page to load a photo
+    (r"/resources/(logo.jpg)", tornado.web.StaticFileHandler, {"path": "./"})
 ]
 
 def main():
