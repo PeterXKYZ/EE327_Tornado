@@ -51,7 +51,7 @@
     </style>
 </head>
 <body>
-    <img class="ghost" src="logo.jpg" alt="img not found">
+    <img class="ghost" src="{{static_url('small_logo.png')}}" alt="img not found">
     <h2>PolterChime Web Portal</h2>
     <h3>Live Video Display</h3>
     <button class="button" id="on_button" onclick="cam_on()">Camera On</button>
@@ -72,7 +72,7 @@
     <button class="button" id="show_recent_pic_button" onclick="show_recent()">View Picture</button> 
     <button class="button" id="hide_recent_pic_button" onclick="hide_recent()">Hide Picture</button> 
     <br>
-    <img class="videoimage" id="recent_pic" src="test.jpg" alt="pic not found">
+    <img class="videoimage" id="recent_pic" src="{{static_url('test.jpg')}}" alt="pic not found">
     <br>
     <br>
     <button class="button extbutton" onclick="show_log()">Show Log</button>
@@ -84,7 +84,7 @@
         //Use sticky for LOG header, and use fixed for the ghost image
         let ws = new WebSocket("ws://localhost:420/web");
         let cam_on_bool = false;
-        let recent_pic_data = "test.jpg";
+        let recent_pic_data = "{{static_url('test.jpg')}}";
         let frame_count = 0;
         let frame_dec = 1;
         buttonhide(0);

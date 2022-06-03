@@ -95,7 +95,7 @@ class CamHandler(tornado.websocket.WebSocketHandler):
                 localdate = time.strftime("%Y-%m-%d %H.%M.%S", localtime_struct)
                 cv.imwrite(f"img/{localdate}.jpg", img)
 
-        
+         
     def on_close(self):
         print("cam WebSocket closed")
         cl_cam.remove(self)
@@ -107,14 +107,16 @@ class CamHandler(tornado.websocket.WebSocketHandler):
 urls = [
     (r"/", IndexHandler),
     (r"/web", WebPageHandler), 
-    (r"/cam", CamHandler),
+    (r"/cam", CamHandler)
     # https://stackoverflow.com/questions/32288515/how-to-load-html-image-files-on-the-python-tornado
-    (r"/resources/(test.jpg)", tornado.web.StaticFileHandler, {"path": "./"}), # used by html page to load a photo
-    (r"/resources/(logo.jpg)", tornado.web.StaticFileHandler, {"path": "./"})
+    # (r"/resources/(test.jpg)", tornado.web.StaticFileHandler, {"path": "./"}), # used by html page to load a photo
+    # (r"/resources/(logo.jpg)", tornado.web.StaticFileHandler, {"path": "./"})
 ]
+ 
+settings = {"static_path": os.path.join(os.path.dirname(__file__), "resources")}
 
 def main():
-    app = tornado.web.Application(urls, autoreload=True)
+    app = tornado.web.Application(urls, autoreload=True, **settings)
     app.listen(420)
     print("I'm listening on port 420")
     tornado.ioloop.IOLoop.current().start()
