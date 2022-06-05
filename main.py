@@ -42,10 +42,12 @@ class WebPageHandler(tornado.websocket.WebSocketHandler):
             log_list = os.listdir("img/")
             for img in log_list:
                 client_write_msg(cl_web, img)
+            return
         elif message == "delete":
             # https://stackoverflow.com/questions/1548704/delete-multiple-files-matching-a-pattern
             for f in glob.glob("img/*.jpg"):
                 os.remove(f)
+            return 
 
         # everytime a message arrives at the web client, it
         # passes the message along to the cam client
@@ -72,15 +74,16 @@ class CamHandler(tornado.websocket.WebSocketHandler):
         
             # when the doorbell button is pressed, send a SMS message
             # to the phone number provided in sms.py
-            print("send text?")
+            print("button send text")
             # sms.button_send_text() 
 
         elif message == "pir":
-            client_write_msg(cl_cam, "photo")
+            client_write_msg(cl_cam, "photo")  
 
             # when the pir sensor is triggered, send a SMS message
-            # to the phone number provided in sms.py        
-            sms.pir_send_text()    
+            # to the phone number provided in sms.py     
+            print("pir send text")   
+            # sms.pir_send_text()    
 
         else:
             client_write_msg(cl_web, message, True) # True means to send message as binary
@@ -92,7 +95,7 @@ class CamHandler(tornado.websocket.WebSocketHandler):
                 img = cv.imdecode(msg, cv.IMREAD_UNCHANGED)
                 time_epoch = time.time()
                 localtime_struct = time.localtime(time_epoch)
-                localdate = time.strftime("%Y-%m-%d %H.%M.%S", localtime_struct)
+                localdate = time.strftime("%Y-%m-%d_%H.%M.%S", localtime_struct)
                 cv.imwrite(f"img/{localdate}.jpg", img)
 
          
@@ -107,16 +110,16 @@ class CamHandler(tornado.websocket.WebSocketHandler):
 urls = [
     (r"/", IndexHandler),
     (r"/web", WebPageHandler), 
-    (r"/cam", CamHandler)
+    (r"/cam", CamHandler),
     # https://stackoverflow.com/questions/32288515/how-to-load-html-image-files-on-the-python-tornado
-    # (r"/resources/(test.jpg)", tornado.web.StaticFileHandler, {"path": "./"}), # used by html page to load a photo
-    # (r"/resources/(logo.jpg)", tornado.web.StaticFileHandler, {"path": "./"})
+    (r"/(.*)", tornado.web.StaticFileHandler, {'path': './img/'})
 ]
  
-settings = {"static_path": os.path.join(os.path.dirname(__file__), "resources")}
+settings = {"static_path": os.path.join(os.path.dirname(__file__), "resources")}   
+
 
 def main():
-    app = tornado.web.Application(urls, autoreload=True, **settings)
+    app = tornado.web.Application(urls, autoreload=True, **settings) 
     app.listen(420)
     print("I'm listening on port 420")
     tornado.ioloop.IOLoop.current().start()

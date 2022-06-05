@@ -72,7 +72,7 @@
     <button class="button" id="show_recent_pic_button" onclick="show_recent()">View Picture</button> 
     <button class="button" id="hide_recent_pic_button" onclick="hide_recent()">Hide Picture</button> 
     <br>
-    <img class="videoimage" id="recent_pic" src="{{static_url('test.jpg')}}" alt="pic not found">
+    <img class="videoimage" id="recent_pic" src="2022-06-05_15.57.46.jpg" alt="pic not found">
     <br>
     <br>
     <button class="button extbutton" onclick="show_log()">Show Log</button>
@@ -84,7 +84,7 @@
         //Use sticky for LOG header, and use fixed for the ghost image
         let ws = new WebSocket("ws://localhost:420/web");
         let cam_on_bool = false;
-        let recent_pic_data = "{{static_url('test.jpg')}}";
+        let recent_pic_data = "test.jpg";
         let frame_count = 0;
         let frame_dec = 1;
         buttonhide(0);
@@ -105,7 +105,11 @@
                     
                     const td = document.createElement('td');
                     td.width = '200';
-                    td.appendChild(document.createTextNode(`${event.data}`))
+
+                    const a = document.createElement('a');  // creates an hyperlink element
+                    a.href=`${event.data}`;     // sets href tag to photo link
+                    a.appendChild(document.createTextNode(`${event.data}`)) // creates text and add to body of hyperlink tags: <a>[body]</a>;
+                    td.appendChild(a);  // add hyperlink element to table
                     tr.appendChild(td);
         
                     return;
