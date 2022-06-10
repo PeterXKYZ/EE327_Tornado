@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video thing</title>
     <style>
-        body {background-color: #c09ee2;}
+        body {background-color: #c09ee2; font-family: sans-serif;}
         .button {
             background-color: #6463d0;
             border: none;
@@ -25,6 +25,13 @@
         .g {
             background-color: #d063d0;
         }
+        div.logheader {
+            background-color: #c09ee2;
+            padding: 15px 5px;
+            position: sticky;
+            display: inline-block;
+            top: 0;
+        }
         img.videoimage {
             position: static;
             border: 6px solid #545aa4;
@@ -33,26 +40,34 @@
             color: aliceblue;
         }
         h3 {
-            color: #818181
+            color: aliceblue;
         }
         h4{
-            color: #ffbf91
+            color: aliceblue;
         }
         img.ghost {
             position: fixed;
             top: 0;
             right: 0;
         }
-        h3.logheader {
-            position: -webkit-sticky;
-            position: sticky;
-            top: 0;
+        a.LogElement {
+            background-color: #d861e6;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 18px;
+            margin: 4px 2px;
         }
+
     </style>
 </head>
 <body>
     <img class="ghost" src="{{static_url('small_logo.png')}}" alt="img not found">
     <h2>PolterChime Web Portal</h2>
+    <br>
     <h3>Live Video Display</h3>
     <button class="button" id="on_button" onclick="cam_on()">Camera On</button>
     <button class="button" id="off_button" onclick="cam_off()">Camera Off</button>
@@ -72,11 +87,14 @@
     <button class="button" id="show_recent_pic_button" onclick="show_recent()">View Picture</button> 
     <button class="button" id="hide_recent_pic_button" onclick="hide_recent()">Hide Picture</button> 
     <br>
-    <img class="videoimage" id="recent_pic" src="2022-06-05_15.57.46.jpg" alt="pic not found">
+    <img class="videoimage" id="recent_pic" src="" alt="pic not found">
     <br>
     <br>
-    <button class="button extbutton" onclick="show_log()">Show Log</button>
+    <div class="logheader">
+    <button class="button extbutton" id="show_log_button" onclick="show_log()">Show Log</button>
+    <button class="button extbutton" id="hide_log_button" onclick="hide_log()">Hide Log</button>
     <button class="button extbutton" onclick="delete_log()">Delete Log</button>
+    </div>
     <table id="log_table">
     </table>
 
@@ -84,11 +102,14 @@
         //Use sticky for LOG header, and use fixed for the ghost image
         let ws = new WebSocket("ws://localhost:420/web");
         let cam_on_bool = false;
-        let recent_pic_data = "test.jpg";
+        let recent_pic_data = "2022-06-05_15.57.46.jpg";
         let frame_count = 0;
         let frame_dec = 1;
+        let log_displayed = false;
+
         buttonhide(0);
         hide_recent();
+        hide_log();
 
         ws.onmessage = function(event) {
             console.log(`${typeof event.data}`);
@@ -98,20 +119,28 @@
                     return;
                 }
                 else {
+                    let text = event.data;
                     // https://thewebdev.info/2021/05/15/how-to-create-an-html-table-using-javascript/
                     const table = document.getElementById("log_table");
                     const tr = document.createElement('tr');
                     table.appendChild(tr);
                     
                     const td = document.createElement('td');
-                    td.width = '200';
+                    td.width = '100%';
+                    
 
                     const a = document.createElement('a');  // creates an hyperlink element
-                    a.href=`${event.data}`;     // sets href tag to photo link
-                    a.appendChild(document.createTextNode(`${event.data}`)) // creates text and add to body of hyperlink tags: <a>[body]</a>;
+                    a.className = "LogElement";
+                    a.target = "_blank";
+                    a.href=`${text}`;     // sets href tag to photo link
+
+                    let newtext = text.replace(/(_|.jpg)/g, " ");
+                    newtext = newtext.replace(/\./g, ":");
+                    a.appendChild(document.createTextNode(`${newtext}`)); // creates text and add to body of hyperlink tags: <a>[body]</a>;
                     td.appendChild(a);  // add hyperlink element to table
                     tr.appendChild(td);
         
+                    log_displayed = true;
                     return;
                 }
             }
@@ -146,7 +175,11 @@
                         // Need to remove some junk at the start of the message
                         var realdata = base64data.substr(base64data.indexOf(',') + 1);  
                         recent_pic_data = "data:image/jpeg;base64," + realdata;
-                        document.getElementById("recent_pic").src = recent_pic_data;
+                        let hrpb = document.getElementById("hide_recent_pic_button");
+                        if (hrpb.style.visibility == "visible") {
+                            document.getElementById("recent_pic").src = recent_pic_data;
+                        }
+                        
                         console.log("photo taken");
                     }
                 }
@@ -196,13 +229,19 @@
         }
 
         function show_recent() {
-            document.getElementById("recent_pic").style.visibility = "visible";
+            const pic = document.getElementById("recent_pic");
+            pic.style.visibility = "visible";
+            pic.src = recent_pic_data;
+
             document.getElementById("show_recent_pic_button").style.visibility = "hidden";
             document.getElementById("hide_recent_pic_button").style.visibility = "visible";
         }
 
         function hide_recent() {
-            document.getElementById("recent_pic").style.visibility = "hidden";
+            const pic = document.getElementById("recent_pic");
+            pic.style.visibility = "hidden";
+            pic.src = "";
+
             document.getElementById("show_recent_pic_button").style.visibility = "visible";
             document.getElementById("hide_recent_pic_button").style.visibility = "hidden";
         }
@@ -224,7 +263,21 @@
         }
         
         function show_log() {
-            ws.send("show");
+            if (!log_displayed) {
+                ws.send("show");
+
+                document.getElementById("show_log_button").style.visibility = "hidden";
+                document.getElementById("hide_log_button").style.visibility = "visible";
+            }
+        }
+
+        function hide_log() {
+            const table = document.getElementById("log_table");
+            table.innerHTML = ""
+            log_displayed = false;
+
+            document.getElementById("show_log_button").style.visibility = "visible";
+            document.getElementById("hide_log_button").style.visibility = "hidden";
         }
 
         function delete_log() {

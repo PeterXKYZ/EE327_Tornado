@@ -12,7 +12,6 @@ cl_cam = []
 cl_esp = []
 cam_on = False
 
-
 def client_write_msg(cl, msg, binary=False):
     for c in cl:
         c.write_message(msg, binary=binary)
@@ -41,7 +40,7 @@ class WebPageHandler(tornado.websocket.WebSocketHandler):
         elif message == "show":
             log_list = os.listdir("img/")
             for img in log_list:
-                client_write_msg(cl_web, img)
+                client_write_msg(cl_web, img) 
             return
         elif message == "delete":
             # https://stackoverflow.com/questions/1548704/delete-multiple-files-matching-a-pattern
@@ -98,7 +97,7 @@ class CamHandler(tornado.websocket.WebSocketHandler):
                 localdate = time.strftime("%Y-%m-%d_%H.%M.%S", localtime_struct)
                 cv.imwrite(f"img/{localdate}.jpg", img)
 
-         
+        
     def on_close(self):
         print("cam WebSocket closed")
         cl_cam.remove(self)
